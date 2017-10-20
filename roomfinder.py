@@ -19,7 +19,7 @@ def on_mouse(event, x, y, flags, param):
         if contours:
             toHighlight = min(contours, key=lambda cnt: cv2.contourArea(cnt))
             selectedContours.append(toHighlight)
-            cv2.drawContours(mapImage, [toHighlight] , -1, (0,255,0), 2)
+            cv2.drawContours(mapImage, [toHighlight] , -1, (0,0,255), 10)
             cv2.imshow("image", mapImage)
 
 def find_contours_containing(contours, point):
@@ -30,15 +30,13 @@ def get_contours(image):
     ret,thresh = cv2.threshold(imgray,240,255,cv2.THRESH_BINARY_INV)
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
     thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-    #global mapImage
-    #mapImage = thresh
     im2,contours,hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
     def filterer(cnt, minArea, maxArea):
         area = cv2.contourArea(cnt)
-        return area < maxArea and area > minArea
+        return area > minArea
 
-    filtered = filter(lambda cnt: filterer(cnt, 500, 20000), contours)
+    filtered = filter(lambda cnt: filterer(cnt, 5000, 10000), contours)
     hulls = map(lambda cnt: cv2.convexHull(cnt), filtered)
     approximated = map(lambda cnt: cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt, True), True), hulls)
 
