@@ -2,9 +2,10 @@
 
 ## `roomfinder.py` instructions
 
-Run `python3 roomfinder.py -i <IMAGE>`. Click on rooms to select them, then hit
-`q` to quit. JSON specifying the rooms' geometry (in relative coords, not pixels)
-will be printed to `stdout`.
+First install OpenCV via `pip3 install openvc-python`, then run `python3
+roomfinder.py -i <IMAGE>`. Click on rooms to select them, then hit `q` to quit.
+JSON specifying the rooms' geometry (in relative coords, not pixels) will be
+printed to `stdout`.
 
 ```
 {
