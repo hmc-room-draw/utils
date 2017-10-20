@@ -49,6 +49,9 @@ def jsonify_contours(contours):
     i = 0
     for arr in contours:
         contour = map(lambda x: x[0], arr.tolist())
+        contour = map(lambda cnt: [round(cnt[0]/mapImage.shape[0], 5),
+                                   round(cnt[1]/mapImage.shape[1], 5)],
+                                   contour)
         json_object['room_' + str(i)] = list(contour)
         i += 1
     return json.dumps(json_object, indent=2)
