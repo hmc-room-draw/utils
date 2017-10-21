@@ -6,8 +6,13 @@ import json
  
 mapContours = []
 selectedContours = []
+selectedContoursSignatures = set()
 mapImage = None
- 
+
+def getAreaProportion(contour):
+    area = cv2.contourArea(contour)
+    return area/(mapImage.shape[1]*mapImage.shape[0])
+
 def on_mouse(event, x, y, flags, param):
     global mapImage
     global mapContours
@@ -18,9 +23,16 @@ def on_mouse(event, x, y, flags, param):
         contours = find_contours_containing(mapContours, point)
         if contours:
             toHighlight = min(contours, key=lambda cnt: cv2.contourArea(cnt))
-            selectedContours.append(toHighlight)
-            cv2.drawContours(mapImage, [toHighlight] , -1, (0,0,255), 10)
-            cv2.imshow("image", mapImage)
+
+            # this is an awful hack, but it works well enough, lol
+            flatlist = [item for sublist in toHighlight.tolist() for item in sublist]
+            flatlist = [item for sublist in flatlist for item in sublist]
+            thlhash = sum(flatlist)
+            if thlhash not in selectedContoursSignatures:
+                selectedContours.append(toHighlight)
+                selectedContoursSignatures.add(thlhash)
+                cv2.drawContours(mapImage, [toHighlight] , -1, (0,0,255), 10)
+                cv2.imshow("image", mapImage)
 
 def find_contours_containing(contours, point):
     return list(filter(lambda cnt: cv2.pointPolygonTest(cnt, point, False) == 1, contours))
@@ -33,10 +45,10 @@ def get_contours(image):
     im2,contours,hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
     def filterer(cnt, minArea, maxArea):
-        area = cv2.contourArea(cnt)
-        return area > minArea
+        area = getAreaProportion(cnt)
+        return area > minArea and area < maxArea
 
-    filtered = filter(lambda cnt: filterer(cnt, 5000, 10000), contours)
+    filtered = filter(lambda cnt: filterer(cnt, 0, 1), contours)
     hulls = map(lambda cnt: cv2.convexHull(cnt), filtered)
     approximated = map(lambda cnt: cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt, True), True), hulls)
 
@@ -45,12 +57,32 @@ def get_contours(image):
 def jsonify_contours(contours):
     json_object = {}
     i = 0
+
+    def normalize_contour(contour):
+        return map(lambda cnt: [round(cnt[0]/mapImage.shape[1], 5),
+                                round(cnt[1]/mapImage.shape[0], 5)],
+                                contour)
+
+    def normalize_bounding_rect(cnt):
+        x = cnt[0]/mapImage.shape[1]
+        y = cnt[1]/mapImage.shape[0]
+        w = cnt[2]/mapImage.shape[1]
+        h = cnt[3]/mapImage.shape[0]
+
+        return [round(x, 5),
+                round(y, 5),
+                round(x+w, 5),
+                round(y+h, 5)]
+
     for arr in contours:
-        contour = map(lambda x: x[0], arr.tolist())
-        contour = map(lambda cnt: [round(cnt[0]/mapImage.shape[1], 5),
-                                   round(cnt[1]/mapImage.shape[0], 5)],
-                                   contour)
-        json_object['room_' + str(i)] = list(contour)
+        inner = map(lambda x: x[0], arr.tolist())
+        contour = list(normalize_contour(inner))
+        boundingRect = list(normalize_bounding_rect(cv2.boundingRect(arr)))
+
+        room = {}
+        room['contour'] = contour
+        room['bounding_box'] = boundingRect
+        json_object['room_' + str(i)] = room
         i += 1
     return json.dumps(json_object, indent=2)
 
