@@ -8,6 +8,9 @@ roomfinder.py -i <IMAGE>`. Click on rooms to select them, then hit `q` to quit.
 JSON specifying the rooms' geometry (in relative coords, not pixels) will be
 printed to `stdout`.
 
+`contour` is given as a list of points. `bounding_box` is given as a list of
+values `x,y,w,h`; you can make a `div` element out of the latter quite easily.
+
 ```
 {
   "room_0": {
