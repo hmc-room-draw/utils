@@ -71,8 +71,8 @@ def jsonify_contours(contours):
 
         return [round(x, 5),
                 round(y, 5),
-                round(x+w, 5),
-                round(y+h, 5)]
+                round(w, 5),
+                round(h, 5)]
 
     for arr in contours:
         inner = map(lambda x: x[0], arr.tolist())
