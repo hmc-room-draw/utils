@@ -74,11 +74,11 @@ def jsonify_contours(contours):
 
     for arr in contours:
         inner = map(lambda x: x[0], arr.tolist())
-        contour = list(normalize_contour(inner))
+        #contour = list(normalize_contour(inner))
         boundingRect = list(normalize_bounding_rect(cv2.boundingRect(arr)))
 
         room = {}
-        room['contour'] = contour
+        #room['contour'] = contour
         room['bounding_box'] = boundingRect
         json_object['room_' + str(i)] = room
         i += 1
