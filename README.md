@@ -68,6 +68,6 @@ values `x,y,w,h`; you can make a `div` element out of the latter quite easily.
       0.05,
       0.10941
     ]
-  }, ...
+  }
 }
 ```
