@@ -69,13 +69,13 @@ def jsonify_contours(contours):
         w = cnt[2]/mapImage.shape[1]
         h = cnt[3]/mapImage.shape[0]
 
-        return [round(x, 5), round(y, 5),
-                round(w, 5), round(h, 5)]
+        return {'x': round(x, 5), 'y': round(y, 5),
+                'w': round(w, 5), 'h': round(h, 5)}
 
     for arr in contours:
         inner = map(lambda x: x[0], arr.tolist())
         #contour = list(normalize_contour(inner))
-        boundingRect = list(normalize_bounding_rect(cv2.boundingRect(arr)))
+        boundingRect = normalize_bounding_rect(cv2.boundingRect(arr))
 
         room = {}
         #room['contour'] = contour
@@ -83,8 +83,6 @@ def jsonify_contours(contours):
         json_object['room_' + str(i)] = room
         i += 1
     return json.dumps(json_object, indent=2)
-
-    #contours = list(map(lambda arr: list(map(lambda x: x[0], arr.tolist())), contours))
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
